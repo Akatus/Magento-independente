@@ -1,0 +1,364 @@
+<?php 
+
+	$_code=$this->getMethodCode();
+	
+?>
+
+<div>
+
+<?php echo $this->getMethod()->getConfigData('message');
+
+
+
+$hiddenbandeira = $_code."_check_cartaobandeira";
+
+?>
+
+</div>
+
+<!--<ul id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;margin-left: 30px;">-->
+<ul class="form-list" id="payment_form_<?php echo $_code ?>" style="display:none;">
+	
+	<?php
+
+		
+		$json = array("meios_de_pagamento"=>array("correntista"=>array("api_key"=>$this->getMethod()->getConfigData('api_key'), 
+																		"email"=>$this->getMethod()->getConfigData('email_gateway'))));
+		$toJson = json_encode($json);
+
+		$url = 'https://www.akatus.com/api/v1/meios-de-pagamento.json';
+		#$url = 'https://dev.akatus.com/api/v1/meios-de-pagamento.json';
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL,$url);
+		#curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+		# curl_setopt($curl, CURLOPT_USERPWD, $user . ":" . $passwd);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/4.0");
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $toJson);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		$retJson = curl_exec($curl);
+		$errJson = curl_error($curl);
+
+		Mage::Log("Erro de cURL:". $errJson);
+
+		curl_close($curl);
+		
+
+		$retornoArray = json_decode($retJson);
+		
+		$meios = $retornoArray->resposta->meios_de_pagamento;
+
+		foreach($meios as $meiopagamento){		
+
+		if($meiopagamento->descricao == "Cartão de Crédito")
+			{
+				Mage::Log("Mostrar Cartões");
+				echo "<li>
+					  <!--<input onClick='ffCartaodeCredito();' type='radio' value='".$meiopagamento->descricao."' name='forma' id='forma'>-->
+					  <input type='hidden' value='".$meiopagamento->descricao."' name='ccakatus' id='ccakatus'>
+					  <!--<span>".$meiopagamento->descricao.'</span>-->'; ?>
+					  
+					  <div style="display:block" id="cc" name="cc">   
+						
+						<style>
+							#tablePay td { vertical-align:middle; }
+							#tablePay td { padding-bottom:2px; }
+							.cc_inactive { border:1px solid #F0F1F1; margin-right:2px; cursor:pointer; margin-bottom:8px; }
+							.cc_active { border:1px solid #CCCDCE; margin-right:2px; cursor:pointer; margin-bottom:8px; }
+							.cc_active.last { margin-right:0 !important; }
+							.cc_inactive.last { margin-right:0 !important; }
+							#tablePay .validation-advice { margin:0; }
+							#tablePay .input-text { width:230px; }
+							#tablePay td.label { padding-right:10px; }
+						</style>
+						
+						<table id="tablePay" cellspacing="5px" style = 'margin-top:10px; '>
+							<tbody>
+								<tr>
+									<td colspan = "2">
+										<div id = 'cc_bandeiras'>
+											<?php
+												
+												$bandeiras=$meiopagamento->bandeiras;
+
+												foreach($bandeiras as $bandeira){ 
+													
+													echo "<img id = 'cc_".$bandeira->codigo."' src = '".$this->getSkinUrl('cartoes/') . $bandeira->codigo.".png' class = 'cc_inactive";
+													//if($i == $count): echo " last"; endif;
+													 echo "' onclick = 'selectBandeira29(this.id);'/>";                                                                                                     
+												}
+												echo "<br>* Não esqueça de selecionar a bandeira de seu cartão.";
+											?>
+											<div>                                                                                         
+                           <input type="hidden" title="<?php echo $this->__('Check Cartaobandeira:') ?>" name="payment[check_cartaobandeira]" id="<?php echo $hiddenbandeira;?>" class="input-text required-entry" />
+                                                                                        
+											</div>
+										</div>
+									</td>
+								</tr>   
+								<?php /*
+								<tr>
+									<td>Bandeira</td>
+									<td>
+										<label>
+											
+										</label>
+									</td>
+								</tr>        */?>  
+								<tr>
+									<td class = 'label'>Nome</td>
+									<td><input type="text" title="<?php echo $this->__('Check Nome:') ?>" class="input-text required-entry" id="<?php echo $_code ?>_check_nome" name="payment[check_nome]" value="<?php echo $this->htmlEscape($this->getInfoData('check_nome')) ?>" /></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><span class="obs">(Exatamente como esta escrito no cartão)</span></td>
+								</tr>
+								<tr>
+									<td class = 'label'>CPF</td>
+									<td><input title="<?php echo $this->__('Check CPF:') ?>" type="text" size="19" name="payment[check_cpf]" id="<?php echo $_code ?>_check_cpf" class="input-text required-entry" ></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><span class="obs">(CPF do proprietario do cartão, somente números)</span></td>
+								</tr>
+								<tr>
+									<td class = 'label'>Nº Cartão:</td>
+									<td><input title="<?php echo $this->__('Check Numerocartao:') ?>" type="text" maxlength="16" size="16" name="payment[check_numerocartao]" id="<?php echo $_code ?>_check_cartaocredito" class="input-text required-entry" ></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><span class="obs">(Sem espaços ou traços)</span></td>
+								</tr>
+								<tr>
+									<td class = 'label'>Validade:</td>
+									<td> 
+										<select title="<?php echo $this->__('Check Expiracaomes:') ?>" value="" maxlength="2" size="1" name="payment[check_expiracaomes]" id="<?php echo $_code ?>_check_expiracaomes" class="input-text required-entry" style="width:50px; float:left;">
+											<option value="">Mês</option>	
+											<option value="01">01</option>
+											<option value="02">02</option>
+											<option value="03">03</option>
+											<option value="04">04</option>
+											<option value="05">05</option>
+											<option value="06">06</option>
+											<option value="07">07</option>
+											<option value="08">08</option>
+											<option value="09">09</option>
+											<option value="10">10</option>
+											<option value="11">11</option>
+											<option value="12">12</option>
+										</select>
+										
+										<select type="text" title="<?php echo $this->__('Check Expiracaoano:') ?>" value="" maxlength="2" size="1" name="payment[check_expiracaoano]" id="<?php echo $_code ?>_check_expiracaoano" class="input-text required-entry" style="width:50px; float:left; ">
+								<option value="">Ano</option>											
+											<option value="12">12</option>
+											<option value="13">13</option>
+											<option value="14">14</option>
+											<option value="15">15</option>
+											<option value="16">16</option>
+											<option value="17">17</option>
+											<option value="18">18</option>
+											<option value="19">19</option>
+											<option value="20">20</option>
+											<option value="21">21</option>
+										</select>
+										
+									</td>
+								</tr>
+								<tr>
+									<td class = 'label'>Código de segurança:</td>
+									<td> <input type="text" title="<?php echo $this->__('Check Codseguranca:') ?>" size="1" maxlength="4" name="payment[check_codseguranca]" id="<?php echo $_code ?>_check_codseguranca" class="input-text required-entry"> </td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><span class="obs"></span></td>
+								</tr>
+								<tr>
+									<td class = 'label'>Parcelas:</td>
+                                                                        
+                                                                        <?php
+                                                                        
+                                                                        $jsonUrl = "https://www.akatus.com/api/v1/parcelamento/simulacao.json?email=".$this->getMethod()->getConfigData('email_gateway')."&amount=".Mage::getSingleton('checkout/cart')->getQuote()->getGrandTotal()."&payment_method=cartao_master&api_key=".$this->getMethod()->getConfigData('api_key');
+                                                                        
+                                                                        //echo $jsonUrl;
+                                                                        
+                                                                        $curl2 = curl_init($jsonUrl);                                                                        
+                                                                        curl_setopt($curl2, CURLOPT_SSL_VERIFYPEER, false);
+                                                                        curl_setopt($curl2, CURLOPT_POST, false);
+                                                                        curl_setopt($curl2, CURLOPT_RETURNTRANSFER, true);
+                                                                        $ret = curl_exec($curl2);
+                                                                        $err = curl_error($curl2);
+                                                                        curl_close($curl2);
+                                                                        
+                                                                        $parcelamentos = json_decode($ret, true);
+                                                                       
+                                                                        $juros1 =  str_replace("% ao mês","", $parcelamentos["resposta"]["descricao"]);
+                                                                        $juros  = str_replace(",",".",$juros1);
+                                                                        $parcelasAssumidas = $parcelamentos["resposta"]["parcelas_assumidas"];
+                                                                        
+                                                                        
+                                                                        if(!empty($parcelamentos['resposta']['parcelas'])){
+                                                                                
+                                                                                ?>
+                                                                                <td>
+                                                                                    <label>
+                                                                                            <select title="<?php echo $this->__('Check Parcelamento:') ?>" name="payment[check_parcelamento]" id="<?php echo $_code ?>_check_parcelamento" class="input-text required-entry">
+                                                                                                    <?php 													
+                                                                                                   
+                                                                                                   	$i =1;										
+                                                                                                    foreach($parcelamentos["resposta"]["parcelas"] as $parcelas){
+                                                                                                                                                                                                                    
+                                                                                                            if($i > $parcelamentos["resposta"]["parcelas_assumidas"]){
+                                                                                                                $jurosdisclaimer = "(".$juros1."% a.m)";
+                                                                                                            } else {
+                                                                                                                $jurosdisclaimer = " sem juros";
+                                                                                                            }
+                                                                                                            
+                                                                                                            $valorParcelaFinal = number_format($parcelas['valor'], 2, ",", ".");
+                                                                                                            $valorTotalFinal   = number_format($parcelas['total'], 2, ",", ".");
+                                                                                                            
+                                                                                                            if($parcelas['valor'] < 5 && $jurosdisclaimer != " sem juros")
+                                                                                                            	continue;
+
+                                                                                                            echo "<option value = '{$i}'>{$i}x fixas de R$ {$valorParcelaFinal}    Total: R$ {$valorTotalFinal} ".$jurosdisclaimer."</option>";												
+                                                                                                            
+                                                                                                            $i++;
+                                                                                                        
+                                                                                                         
+                                                                                                    }
+                                                                                                   
+                                                                                                    
+                                                                                                    											
+                                                                                                    ?>
+                                                                                            </select>
+                                                                                    </label>
+                                                                                </td>
+                                                                        
+                                                                                
+                                                                                <?
+                                                                            
+                                                                            
+                                                                            
+                                                                        } else {
+                                                                            
+                                                                            ?>
+                                                                            <td>
+                                                                                    <label>
+                                                                                            <select title="<?php echo $this->__('Check Parcelamento:') ?>" name="payment[check_parcelamento]" id="<?php echo $_code ?>_check_parcelamento" class="input-text required-entry">
+                                                                                                  <option value = '1'>1x fixa de R$ <?= number_format(Mage::getSingleton('checkout/cart')->getQuote()->getGrandTotal(), 2, ",", ".")?>    Total: R$<?=number_format(Mage::getSingleton('checkout/cart')->getQuote()->getGrandTotal(),2,",","."); ?> </option>";												
+                                                                                                            
+                                                                                                         
+                                                                                                         
+                                                                                                   
+                                                                                            </select>
+                                                                                    </label>
+                                                                                </td>
+                                                                        
+                                                                            <?
+                                                                            
+                                                                            
+                                                                        }
+                                                                        
+                                                                        
+                                                                        ?>
+									
+								</tr>
+							</tbody>
+						</table>
+					  </div>
+			
+		<?php
+			
+			} 
+
+
+
+			
+		
+			echo "</li>";
+	
+		}/// fim do foreach
+	
+	
+	?>	   
+         
+    <input title="<?php echo $this->__('Check Formapagamento:') ?>" name="payment[check_formapagamento]" type="hidden" id="<?php echo $_code ?>_check_formapagamentocartao" value="cartaodecredito" />
+
+</ul>
+
+<script>
+	
+	var VALOR_COMPRA;
+	function formatarNumero (rnum) {
+		   return "R$ "+ formatamoeda(Math.round(rnum*Math.pow(10,2))/Math.pow(10,2));
+	}
+       
+	function formatamoeda(num) {
+
+		   x = 0;
+
+		   if(num<0) {
+		      num = Math.abs(num);
+		      x = 1;
+		   }
+
+		   if(isNaN(num)) num = "0";
+		      cents = Math.floor((num*100+0.5)%100);
+
+		   num = Math.floor((num*100+0.5)/100).toString();
+
+		   if(cents < 10) cents = "0" + cents;
+		      for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+		         num = num.substring(0,num.length-(4*i+3))+'.'
+		               +num.substring(num.length-(4*i+3));
+
+		   ret = num + ',' + cents;
+
+		   if (x == 1) ret = ' - ' + ret;return ret;
+
+		}
+	
+	function removeOpcoes(selectbox)
+	{
+		var i;
+		for(i=selectbox.options.length-1;i>=0;i--)
+		{
+			selectbox.remove(i);
+		}
+	}	
+	
+        
+        
+        function selectBandeira29(bandeira){
+            
+           document.getElementById('akatuscartao_check_cartaobandeira').value = bandeira;
+           
+           if(bandeira.length != 0){
+               
+                var newClass = "cc_inactive";
+                var children = document.getElementById('cc_bandeiras').getElementsByTagName('img');
+
+                for(var i = 0; i < children.length; i++){
+
+                            var id = children[i].getAttribute("id");                            
+                            var currDivElem = document.getElementById(id);
+                            
+                            if(id == bandeira){                                
+                                currDivElem.setAttribute("class", "cc_active"); 
+                                currDivElem.setAttribute("className", "cc_active");
+                            } else {                            
+                                currDivElem.setAttribute("class", "cc_inactive"); 
+                                currDivElem.setAttribute("className", "cc_inactive");                                
+                            }
+
+                    }	
+                    
+           } else {
+               alert('Vazio'); 
+          }  
+    
+           
+        
+        }
+       
+</script>
