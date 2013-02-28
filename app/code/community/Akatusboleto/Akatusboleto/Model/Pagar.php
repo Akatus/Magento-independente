@@ -476,9 +476,8 @@ class Akatusboleto_Akatusboleto_Model_Pagar extends Mage_Payment_Model_Method_Ab
 		
 		#id do pedido
 		$orderId = $payment->getParentId();
-                
-                
 		$order = Mage::getModel('sales/order')->load($orderId);
+        $incrementId = $order->getIncrementId();                
 	
 		#regata asa informacoes do cliente para montar o XMl
 		$customer = Mage::getSingleton('customer/session')->getCustomer();
@@ -685,7 +684,7 @@ class Akatusboleto_Akatusboleto_Model_Pagar extends Mage_Payment_Model_Method_Ab
 				<frete>'.$transacao_freteTotal.'</frete> 
 				<desconto>'.$transacao_descontoTotal.'</desconto>
 				<peso_total>'.$transacao_pesoTotal.'</peso_total> 
-				<referencia>'.$orderId.'</referencia>				
+				<referencia>'.$incrementId.'</referencia>				
 			</transacao>';
                         
                         
