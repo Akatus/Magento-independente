@@ -106,7 +106,7 @@
 				<!-- order status for new orders paid by this payment method -->
                 <order_status>pending</order_status>
 				<!-- default title for payment checkout page and order view page -->
-                <title>Akatus TEF</title>
+                <title>Débito Online</title>
                 <cctypes>AE,VI,MC</cctypes>
                 <payment_action>authorize</payment_action>
                 <allowspecific>0</allowspecific>

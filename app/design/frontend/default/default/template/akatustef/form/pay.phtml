@@ -27,8 +27,6 @@ $hiddenbandeira = $_code."_check_cartaobandeira";
 		#$url = 'https://dev.akatus.com/api/v1/meios-de-pagamento.json';
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$url);
-		#curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-		# curl_setopt($curl, CURLOPT_USERPWD, $user . ":" . $passwd);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/4.0");
 		curl_setopt($curl, CURLOPT_POST, true);
@@ -60,7 +58,7 @@ $hiddenbandeira = $_code."_check_cartaobandeira";
 					<table id="tablePay" cellspacing="5" style = 'margin-top:10px; '>
 						<tbody>
 							<tr>
-								<td style = 'width:60px'>Bandeira</td>
+								<td></td>
 								<td>
 									<label>
 										<select  title="<?php echo $this->__('Check Tefbandeira:') ?>" style="width:250px;" name="payment[check_tefbandeira]" id="<?php echo $_code ?>_check_tefbandeira" class="input-text required-entry">
@@ -96,13 +94,11 @@ $hiddenbandeira = $_code."_check_cartaobandeira";
 
 <script>
 	function ffTef2(){
-		document.getElementById("<?php echo $_code ?>_check_formapagamentotef").value="tef";
-
+		document.getElementById("akatustef_check_formapagamentotef").value="tef";
+		
 		
 	}
-	
-	
-	var VALOR_COMPRA;
+
 	function formatarNumero (rnum) {
 		   return "R$ "+ formatamoeda(Math.round(rnum*Math.pow(10,2))/Math.pow(10,2));
 	}
@@ -140,39 +136,4 @@ $hiddenbandeira = $_code."_check_cartaobandeira";
 			selectbox.remove(i);
 		}
 	}	
-	
-        
-        
-        function selectBandeira2(bandeira){
-            
-           document.getElementById('<?php echo $_code ?>_check_cartaobandeira').value = bandeira;
-           
-           if(bandeira.length != 0){
-               
-                var newClass = "cc_inactive";
-                var children = document.getElementById('cc_bandeiras').getElementsByTagName('img');
-
-                for(var i = 0; i < children.length; i++){
-
-                            var id = children[i].getAttribute("id");                            
-                            var currDivElem = document.getElementById(id);
-                            
-                            if(id == bandeira){                                
-                                currDivElem.setAttribute("class", "cc_active"); 
-                                currDivElem.setAttribute("className", "cc_active");
-                            } else {                            
-                                currDivElem.setAttribute("class", "cc_inactive"); 
-                                currDivElem.setAttribute("className", "cc_inactive");                                
-                            }
-
-                    }	
-                    
-           } else {
-               alert('Vazio'); 
-          }  
-    
-           
-        
-        }
-       
 </script>
