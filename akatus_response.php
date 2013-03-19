@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 class StatusTransacaoAkatus
 {
@@ -19,9 +19,18 @@ $statusRecebido     = $_POST["status"];
 $tokenRecebido      = $_POST["token"];
 
 #faz a conferencia da transacao
-$tokenNIP = Mage::getStoreConfig('payment/akatus/tokennip');
+$tokenNIP = Mage::getStoreConfig('payment/akatuscartao/tokennip');
 
-//validao retorno
+if ($tokenNIP === '') {
+    $tokenNIP = Mage::getStoreConfig('payment/akatusboleto/tokennip');  
+} else if ($tokenNIP === '') {
+    $tokenNIP = Mage::getStoreConfig('payment/akatustef/tokennip');  
+} else if ($tokenNIP === '') {
+    Mage::Log('Nenhum modulo está habilitado, logo não é possível atualizar as transações');
+    exit;
+}
+
+//valida o retorno
 if($tokenNIP == $tokenRecebido) {
     $order = getOrder($codigoTransacao);
     $novoStatus = getNovoStatus($statusRecebido, $order->getStatus());
