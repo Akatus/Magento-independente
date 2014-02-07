@@ -1,7 +1,7 @@
 <?php
 
-class Akatuscartao_Akatuscartao_Block_Info_Pay extends Mage_Payment_Block_Info {
-
+class Akatuscartao_Akatuscartao_Block_Info_Pay extends Mage_Payment_Block_Info
+{
     protected function _prepareSpecificInformation($transport = null) {
       
         if (null !== $this->_akatuscartaoSpecificInformation) {
@@ -9,39 +9,12 @@ class Akatuscartao_Akatuscartao_Block_Info_Pay extends Mage_Payment_Block_Info {
         }
         
         $info = $this->getInfo();
-        $transport = new Varien_Object();
-        $transport = parent::_prepareSpecificInformation($transport);
 
-        if ($info->getCheckFormapagamentocartao() == 'boleto') {
-            $array = array(
-                Mage::helper('payment')->__('Forma de Pagamento') => $info->getCheckFormapagamento(),
-                Mage::helper('payment')->__('Forma de Pagamento') => "Boleto Bancário",
-                Mage::helper('payment')->__('Segunda Via') => $info->getCheckBoletourl()
-            );
+        $checkBandCC = $info->getCheckCartaobandeira();
 
-            echo ("<table>
-                        <tbody>
-                            <tr>
-                                <th>
-                                <strong>Forma de Pagamento:</strong>
-                                </th>
-                            </tr>
-                            <tr>
-                                <td>Boleto Bancário</td>
-                            </tr>
-                            <tr>
-                                <th>
-                                <strong>Segunda Via</strong>
-                                </th>
-                            </tr>
-                            <tr>
-                                <td><a href = '{$info->getCheckBoletourl()}'>Imprimir</a></td>
-                            </tr>
-                        </tbody>
-                    </table>");
-                                
-        } elseif ($info->getCheckFormapagamentocartao() == 'cartaodecredito') {
-            $checkBandCC = $info->getCheckCartaobandeira();
+
+        if ($checkBandCC !== null) {
+        
             if ($checkBandCC == "cartao_amex") {
 
                 $numeroCartao = $info->getCheckNumerocartao();
@@ -56,38 +29,98 @@ class Akatuscartao_Akatuscartao_Block_Info_Pay extends Mage_Payment_Block_Info {
                 $numCart = "XXXX.XXXX.XXXX." . $last4;
             }
 
-            $cartaoLabel = str_replace("cc_", "", $info->getCheckCartaobandeira());
+            $cartaoLabel = str_replace("cc_", "", $checkBandCC);
+
             switch ($cartaoLabel) {
                 case "cartao_amex":
-                    $cartao = "Cartão American Express";
+                    $cartao = "American Express";
                     break;
                 case "cartao_elo":
-                    $cartao = "Cartão Elo";
+                    $cartao = "Elo";
                     break;
                 case "cartao_master":
-                    $cartao = "Cartão Master";
+                    $cartao = "Master";
                     break;
                 case "cartao_diners":
-                    $cartao = "Cartão Diners";
+                    $cartao = "Diners";
                     break;
                 case "cartao_visa":
-                    $cartao = "Cartão Visa";
+                    $cartao = "Visa";
                     break;
             }
-            $array = array(
-                (Mage::helper('payment')->__('Bandeira do Cartão')) => ($cartao),
-                Mage::helper('payment')->__('Nome') => $info->getCheckNome(),
-                Mage::helper('payment')->__('Cpf') => $info->getCheckCpf(),
-                (Mage::helper('payment')->__('Numero do Cartão')) => $numCart,
-            );
-        } else {
 
-            $array = array(
-                Mage::helper('payment')->__('Bandeira') => $info->getCheckTefbandeira()
-            );
+            echo ("<table>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>Cartão: </strong>{$cartao}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Nome: </strong>{$info->getCheckNome()}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>CPF: </strong>{$info->getCheckCpf()}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Número do Cartão: </strong>{$info->getCheckNumerocartao()}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Número de Parcelas: </strong>{$info->getCheckParcelamento()}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>");
+
+
+            if ($this->isToShowRefund($info->getOrder())) {
+             
+                $estornoURL = $this->getEstornoURL($info->getOrder()->getId());
+             
+                echo ("<table>
+                           <tbody>                                                                                                                                                                                
+                                 <tr>
+                                     <td>
+                                         <strong>Estorno:</strong>
+                                     </td>
+                                 </tr>
+                                 <tr>
+                                     <td><a href ='$estornoURL'>Solicitar estorno</a><br></td>
+                                 </tr>
+                             </tbody>
+                         </table>");
+            }
         }
 
-        $transport->addData($array);
-        return $transport;
+        $transport = new Varien_Object();
+        return parent::_prepareSpecificInformation($transport);
+    }
+
+    private function isToShowRefund($order) 
+    {
+        if (isset($order)) {
+
+            $adminSession = Mage::getSingleton('admin/session', array('name' => 'adminhtml'));
+            $isAdmin = $adminSession->isLoggedIn();
+            $state = $order->getState();
+
+            if ($isAdmin && ($state === Mage_Sales_Model_Order::STATE_COMPLETE || $state === Mage_Sales_Model_Order::STATE_PROCESSING)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function getEstornoURL($orderId)
+    {
+        return Mage::helper("adminhtml")->getUrl("akatusbase/refund/index", array("order" => $orderId));
     }
 }
