@@ -50,7 +50,7 @@ class Akatustef_Akatustef_Block_Info_Pay extends Mage_Payment_Block_Info
                                  </td>
                              </tr>
                              <tr>
-                                 <td><a href ='$estornoURL'>Solicitar estorno</a><br></td>
+                                 <td><button onclick=this.disabled='disabled';window.location.href='$estornoURL'>Solicitar estorno</button></td>
                              </tr>
                          </tbody>
                      </table>");
