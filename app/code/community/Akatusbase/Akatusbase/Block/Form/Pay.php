@@ -150,10 +150,6 @@ class Akatusbase_Akatusbase_Block_Form_Pay extends Mage_Payment_Block_Form
 
         foreach($apiResponse->resposta->parcelas as $parcela){
 
-            if ($parcela->valor < 5) {
-                continue;
-            }
-
             $novaParcela = new stdClass();
             $novaParcela->quantidade = $parcela->quantidade;
             
@@ -168,6 +164,11 @@ class Akatusbase_Akatusbase_Block_Form_Pay extends Mage_Payment_Block_Form
             }
 
             $cloneObject->resposta->parcelas[] = $novaParcela;
+
+            if ($parcela->quantidade > 1 && $parcela->valor < 5) {
+                array_pop($cloneObject->resposta->parcelas);
+                break;
+            }
         }
 
         $numeroMaximoParcelas = Mage::getModel('akatuscartao/pagar')->getConfigData('numero_maximo_parcelas', Mage::app()->getStore()->getId());
