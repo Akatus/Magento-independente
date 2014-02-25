@@ -528,13 +528,28 @@ Payment.prototype = {
             elements = form.select('select');
             for (var i = 0; i < elements.length; i++) elements[i].disabled = false;
             elements = form.select('textarea');
-            for (var i = 0; i < elements.length; i++) elements[i].disabled = false
+            for (var i = 0; i < elements.length; i++) elements[i].disabled = false;
+
+            $$('input[name=payment[method]]').each(function(payment_option) {
+                payment_option.observe('click', function(){
+                    checkout.update({ 'payment-method': 1 });
+
+                    setTimeout(function(){
+                        checkout.update({ 'review': 1 });
+                    }, 1000);
+                });
+            });
+
         } else {
             document.body.fire('payment-method:switched', {
                 method_code: method
-            })
+            });
         }
-        this.currentMethod = method
+
+        this.currentMethod = method;
+
+        $('payment_form_' + this.currentMethod).click();
+
     },
     addBeforeValidateFunction: function (code, func) {
         this.beforeValidateFunc.set(code, func)
