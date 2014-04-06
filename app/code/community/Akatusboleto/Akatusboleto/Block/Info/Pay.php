@@ -11,8 +11,8 @@ class Akatusboleto_Akatusboleto_Block_Info_Pay extends Mage_Payment_Block_Info
 		}
 
 		$info = $this->getInfo();
-
-        if ( ! empty($info->getCheckBoletourl())) {
+        $checkBoletourl = $info->getCheckBoletourl();
+        if ( ! empty($checkBoletourl)) {
 
             echo ("<table>
                         <tbody>
