@@ -27,7 +27,7 @@
                     <div class="full">
                         <label class="required"><sup>*</sup> CPF do proprietário do cartão</label>
                         <div class="data_area">
-                            <input type="text" size="19" name="payment[check_cpf]" id="<?php echo $_code ?>_check_cpf" class="input-text required-entry" >
+                            <input type="text" size="19" name="payment[check_cpf]" id="<?php echo $_code ?>_check_cpf" class="input-text required-entry" onblur="isCPF(this.value);" >
                         </div>
                     </div>							
 
@@ -360,6 +360,35 @@
             alert("O número do seu cartão de crédito foi digitado errado. Por favor verifique o número digitado antes de prosseguir com sua compra.");
             jQuery('input#akatuscartao_check_cartaocredito').val('');
             document.getElementById("akatuscartao_check_cartaocredito").focus();
+        }
+    }
+
+    function isCPF(CPF){ 
+        var isCPF = true;
+
+        var Soma;
+        var Resto;
+        Soma = 0;
+
+        if (CPF == "00000000000") isCPF = false;
+
+        for (i=1; i<=9; i++) Soma = Soma + parseInt(CPF.substring(i-1, i)) * (11 - i);
+        Resto = (Soma * 10) % 11;
+
+        if ((Resto == 10) || (Resto == 11)) Resto = 0;
+        if (Resto != parseInt(CPF.substring(9, 10)) ) isCPF = false;
+
+        Soma = 0;
+        for (i = 1; i <= 10; i++) Soma = Soma + parseInt(CPF.substring(i-1, i)) * (12 - i);
+
+        Resto = (Soma * 10) % 11;
+        if ((Resto == 10) || (Resto == 11)) Resto = 0;
+        if (Resto != parseInt(CPF.substring(10, 11) ) ) isCPF = false;
+
+        if(!isCPF){
+            alert("CPF inválido. Por favor verifique o número digitado antes de prosseguir com sua compra.");
+            jQuery('input#akatuscartao_check_cpf').val('');
+            document.getElementById("akatuscartao_check_cpf").focus();
         }
     }
 </script>

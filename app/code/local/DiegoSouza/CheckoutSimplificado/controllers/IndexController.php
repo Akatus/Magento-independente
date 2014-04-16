@@ -491,16 +491,33 @@ class DiegoSouza_CheckoutSimplificado_IndexController extends Mage_Checkout_Cont
 
             if (!isset($result['redirect']) && !isset($result['error']))
             {
-            	$pmnt_data = $this->getRequest()->getPost('payment', false);
+                $pmnt_data = $this->getRequest()->getPost('payment', false);
                 if ($pmnt_data)
                     $this->getCheckoutSimplificado()->getQuote()->getPayment()->importData($pmnt_data);
 
-                $this->getCheckoutSimplificado()->saveOrder();
-                $redirectUrl = $this->getCheckoutSimplificado()->getCheckout()->getRedirectUrl();
 
-                $result['success'] = true;
-                $result['error']   = false;
-                $result['order_created'] = true;
+                $this->getCheckoutSimplificado()->saveOrder();
+
+                $errorCC = Mage::getSingleton('customer/session')->getErrorCC();
+                Mage::getSingleton('customer/session')->unsErrorCC();
+                if(!empty($errorCC)){
+                    $last_order_increment_id = Mage::getSingleton('checkout/session')->getLastOrderId();;
+                    $order = Mage::getModel('sales/order')->load($last_order_increment_id);
+                    $order->cancel()->save();
+
+                    $result['success'] = false;
+                    $result['error']   = true;
+                    $result['order_created'] = false;
+                    $redirectUrl = Mage::getUrl('checkout/cart');
+
+                }else{
+                    $redirectUrl = $this->getCheckoutSimplificado()->getCheckout()->getRedirectUrl();
+
+                    $result['success'] = true;
+                    $result['error']   = false;
+                    $result['order_created'] = true;
+                }
+                
             }
         }
         catch (Mage_Core_Exception $e)

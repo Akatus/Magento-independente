@@ -97,6 +97,8 @@ class Akatusbase_Akatusbase_Model_Pagar extends Mage_Payment_Model_Method_Abstra
             $errorMsg = $this->_getHelper()->__('Telefone inválido. Deve ser informado o código de área com 2 dígitos seguido do número do telefone com 8 ou 9 dígitos, e somente números (Ex.: 1199999999).');
             Mage::throwException($errorMsg);
         }
+
+        return $valid;
     }
     
     public function stringToUf($estado)

@@ -12,7 +12,8 @@ class Akatusboleto_Akatusboleto_Block_Info_Pay extends Mage_Payment_Block_Info
 
 		$info = $this->getInfo();
 
-        if ( ! empty($info->getCheckBoletourl())) {
+        $checkBoletourl = $info->getCheckBoletourl();
+        if ( ! empty($checkBoletourl)) {
 
             echo ("<table>
                         <tbody>
@@ -25,7 +26,8 @@ class Akatusboleto_Akatusboleto_Block_Info_Pay extends Mage_Payment_Block_Info
                     </table>");
         }
 
-        if ($this->isToShowRefund($info->getOrder())) {
+        $isToShowRefund = $this->isToShowRefund($info->getOrder());
+        if ($isToShowRefund) {
          
             $estornoURL = $this->getEstornoURL($info->getOrder()->getId());
          

@@ -97,7 +97,19 @@ class Akatusboleto_Akatusboleto_Model_Pagar extends Akatusbase_Akatusbase_Model_
 			$consumer_tel = $address->getData("telephone");
 			$consumer_tel = preg_replace('([^0-9])', '', $consumer_tel);
             $isValidTelephone = $this->isTelephoneValid($consumer_tel);
-                        
+
+            $isValidConsumer_fax = false;            
+            $consumer_fax = $address->getData("fax");
+            $consumer_fax = preg_replace('([^0-9])', '', $consumer_fax);
+            if(!empty($consumer_fax))
+                $isValidConsumer_fax = $this->isTelephoneValid($consumer_fax);;
+            
+            $isValidConsumer_cel = false;            
+            $consumer_cel = $address->getData("celular");
+            $consumer_cel = preg_replace('([^0-9])', '', $consumer_cel);
+            if(!empty($consumer_cel))
+                $isValidConsumer_cel = $this->isTelephoneValid($consumer_cel);;
+
             $xml.='
 			<pagador>
 				<nome>'.$customer_nome.'</nome>
@@ -130,14 +142,26 @@ class Akatusboleto_Akatusboleto_Model_Pagar extends Akatusbase_Akatusbase_Model_
 				   </endereco>
 				</enderecos>';
 				
-			$xml.='
-				<telefones>
-					<telefone>
-						<tipo>residencial</tipo>
-						<numero>'.$consumer_tel.'</numero>
-					</telefone>
-				</telefones>
-			</pagador>';
+			$xml .= '<telefones>';
+                $xml .='<telefone>
+                            <tipo>residencial</tipo>
+                            <numero>'.$consumer_tel.'</numero>
+                        </telefone>';
+
+                    if(!empty($isValidConsumer_cel))
+                        $xml.='<telefone>
+                                <tipo>celular</tipo>
+                                <numero>'.$consumer_cel.'</numero>
+                            </telefone>';
+                
+                    if(!empty($isValidConsumer_fax))
+                        $xml.='<telefone>
+                                <tipo>fax</tipo>
+                                <numero>'.$consumer_fax.'</numero>
+                            </telefone>';
+                
+                $xml .= '</telefones>';
+            $xml .= '</pagador>';
 			
 			$items = $order->getAllVisibleItems();
 			$xml .= '
